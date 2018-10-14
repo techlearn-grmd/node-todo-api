@@ -26,6 +26,19 @@ app.post('/todos', (request, response) => {
     });
 });
 
+app.get('/todos', (request, response) => {
+    // Todo.find().then((todos) => {
+    //     response.send({
+    //         todos,
+    //         customCode: 1   // don't just send an array, put array in object so u can tag along returned customer property
+    //     })
+    Todo.find().then((todos) => {
+        response.send({todos})
+    }, (e) => {
+        response.status(400).send(e);
+    });
+});
+
 app.listen(3000, () => {
     console.log('started on 3000');
 });

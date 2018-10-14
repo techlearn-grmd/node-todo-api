@@ -6,11 +6,19 @@ const {app} = require('./../server');
 // need model from todo to verify the todo is indeed added to the collection
 const {Todo} = require('./../models/todo');
 
+// our beforeEach() deletes all the data for post (item 1 to fix)
+// but our get needs data to be there in collection to test (preseed item 2 to fix)
+var todosMock = [{
+    text: 'first todo'
+}, {
+    text: 'second todo'
+}];
+
 // testing lifecycle that will run before each test cases
 beforeEach((done) => {
     Todo.remove({}).then(() => {    // {} will remove all doc in the Collections
-        done();
-    });
+        return Todo.insertMany(todosMock);
+    }).then(() => done());
 });
 
 describe('POST /todos', () => {
@@ -30,7 +38,7 @@ describe('POST /todos', () => {
                     return done(err); // return to stop further processing
                 }
                 // we want to check if the db has updated with the test post
-                Todo.find().then((todos) => {
+                Todo.find({text}).then((todos) => {
                     expect(todos.length).toBe(1);       // there should only be 1 entry
                     expect(todos[0].text).toBe(text);   // that entry to be of text passed in
                     done();
@@ -49,11 +57,25 @@ describe('POST /todos', () => {
                 if (err) {            // if error, then
                     return done(err); // return to stop further processing
                 }
-                // we want to check if the db has updated with the test post
+                // we want to check that the db should NOT updated with the test post
                 Todo.find().then((todos) => {
-                    expect(todos.length).toBe(0);       // there should only be 1 entry
+                    expect(todos.length).toBe(2);       // there should only be 0 entry
                     done();
                 }).catch((e) => done(e));   // catch all Errors
             });    
+    });
+});
+
+describe('GET /todos', () => {
+    it('should get all todo in the collection in body data', (done) => {
+        // supertest syntax
+        request(app)
+            .get('/todos')         // calling post to /todos route
+            .expect(200)            // expect status code == 200 to return
+            .expect((result) => {
+                expect(result.body.todos.length).toBe(2);
+            })
+            .end(done); // since we are not doing anything async, just pass in done    
+
     });
 });

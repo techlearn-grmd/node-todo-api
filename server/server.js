@@ -7,6 +7,7 @@ var {User} = require('./models/user');
 var {Todo} = require('./models/todo');
 
 var app = express();
+const port = process.env.PORT || 3000;  // local -> 3000, heroku -> set by env
 
 // body-parser -> take json -> jscript object and attach to the request object 
 // use the middleware to do the conversion
@@ -69,8 +70,8 @@ app.get('/todos/:id', (request, response) => {
     });
 });
 
-app.listen(3000, () => {
-    console.log('started on 3000');
+app.listen(port, () => {
+    console.log(`started on ${port}`);
 });
 
 module.exports = {app};

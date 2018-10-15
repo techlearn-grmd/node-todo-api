@@ -1,5 +1,6 @@
 const expect = require('expect');
 const request = require('supertest');   // note: request is set to supertest
+const {ObjectID} = require('mongodb');
 
 const {app} = require('./../server');
 
@@ -8,11 +9,13 @@ const {Todo} = require('./../models/todo');
 
 // our beforeEach() deletes all the data for post (item 1 to fix)
 // but our get needs data to be there in collection to test (preseed item 2 to fix)
-var todosMock = [{
-    text: 'first todo'
+const todosMock = [{
+    _id: new ObjectID(),
+    text: 'first todo 1'
 }, {
-    text: 'second todo'
-}];
+    _id: new ObjectID(),
+    text: 'second todo 2'
+}]
 
 // testing lifecycle that will run before each test cases
 beforeEach((done) => {
@@ -79,3 +82,39 @@ describe('GET /todos', () => {
 
     });
 });
+
+describe('GET /todos/:id', () => {
+    it('should return todo doc', (done) => {
+        request(app)
+        .get(`/todos/${todosMock[0]._id.toHexString()}`)        // toHexString() converts the ObjectID to a string
+        .expect(200)                                            // expect status code == 200 to return
+        .expect((result) => {
+            expect(result.body.todo.text).toEqual(todosMock[0].text);
+        })
+        .end(done); // since we are not doing anything async, just pass in done
+    });
+
+    it('should return a 404 if todo not found', (done) => {
+        // make request with NEW real object id - valid but not in collection
+        var newHexId = new ObjectID().toHexString();
+
+        // make sure you got a 404 back
+        request(app)
+        .get(`/todos/${newHexId}`)
+        .expect(404)
+        .end(done);
+    });
+
+    it('should return a 404 for non-object ids', (done) => {
+        // make request with an invalid but not in collection
+        // /todos/123
+        var newHexId = new ObjectID(123).toHexString();
+
+        // make sure you got a 404 back
+        request(app)
+        .get(`/todos/${newHexId}`)
+        .expect(404)
+        .end(done);
+    });
+});
+

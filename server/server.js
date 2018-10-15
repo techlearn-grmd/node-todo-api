@@ -70,6 +70,33 @@ app.get('/todos/:id', (request, response) => {
     });
 });
 
+// delete route
+app.delete('/todos/:id', (request, response) => {
+    // get the id
+    var id = request.params.id;
+
+    // Validate id use isValid
+    // response with 404 if id not found, and send back an empty body
+    if (!ObjectID.isValid(id)) {
+        return response.status(404).send(); // return error and prevent further processing
+    }
+
+    // remove todo by id, use findByIdAndRemove
+    Todo.findByIdAndRemove(`${id}`).then((doc) => {
+        // Success
+            // if no doc, return 404
+            if (!doc) {
+                return response.status(404).send();
+            }
+            // if doc, return 200 with doc
+            response.status(200).send({doc});
+    }, (e) => {
+        // Error
+            // 400 without body
+            response.status(400).send();
+    })
+});
+
 app.listen(port, () => {
     console.log(`started on ${port}`);
 });

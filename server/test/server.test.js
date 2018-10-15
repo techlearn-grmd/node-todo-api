@@ -112,9 +112,60 @@ describe('GET /todos/:id', () => {
 
         // make sure you got a 404 back
         request(app)
-        .get(`/todos/${newHexId}`)
-        .expect(404)
-        .end(done);
+            .get(`/todos/${newHexId}`)
+            .expect(404)
+            .end(done);
     });
 });
 
+describe('DELETE /todos/:id', (done) => {
+    // should remove a todo
+    it('should remove a todo', (done) => {
+        var newHexId = todosMock[1]._id.toHexString();
+
+        request(app)
+        .delete(`/todos/${newHexId}`)
+        .expect(200)
+        .expect((result) => {
+            expect(result.body.doc._id).toEqual(newHexId);
+        })
+        .end((error, result) => {
+            if (error) {
+                return done(error);
+            }
+
+            // after it's been removed
+            // query database using findbyId toNotExist() in expect library
+            Todo.findById(newHexId).then((todo) => {
+                expect(todo).toNotExist();
+                done();
+            }).catch((e) => done());
+        });
+    });
+    
+    // should return 404 if todo not found
+    it('should return 404 if todo not found', (done) => {
+        // make request with NEW real object id - valid but not in collection
+        var newHexId = new ObjectID().toHexString();
+
+        // make sure you got a 404 back
+        request(app)
+            .delete(`/todos/${newHexId}`)
+            .expect(404)
+            .end(done);
+    });
+
+    // should return 404 if object id is invalid
+    it('should return 404 if object id is invalid', (done) => {
+        // make request with an invalid but not in collection
+        // /todos/123
+        var newHexId = new ObjectID(123).toHexString();
+
+        // make sure you got a 404 back
+        request(app)
+            .delete(`/todos/${newHexId}`)
+            .expect(404)
+            .end(done);
+    });
+
+});

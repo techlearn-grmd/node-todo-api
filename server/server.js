@@ -1,5 +1,6 @@
 var express = require('express');
 var bodyParser = require('body-parser');
+var {ObjectID} = require('mongodb');
 
 var {mongoose} = require('./db/mongoose');
 var {User} = require('./models/user');
@@ -36,6 +37,35 @@ app.get('/todos', (request, response) => {
         response.send({todos})
     }, (e) => {
         response.status(400).send(e);
+    });
+});
+
+// GET /todos/12345678 <- last is dynamic
+// id variable in the request object
+// request.params is a key:value pair
+app.get('/todos/:id', (request, response) => {
+    // response.send(request.params);      // the params object has "id":"123"
+    var id = request.params.id;
+
+    // Validate id use isValid
+    // response with 404 if id not found, and send back an empty body
+    if (!ObjectID.isValid(id)) {
+        return response.status(404).send(); // return error and prevent further processing
+    }
+
+    // findbyId() -> query todo collection looking for a match
+    Todo.findById(id).then((todo) => {
+        // if no todo, send back 404 with empty body
+        if (!todo) {
+            return response.status(404).send();
+        }
+        // success case
+        // if todo - send it back
+        response.status(200).send({todo});
+    }).catch((e) => {
+        // error case 
+        // 400 - (don't send the error object back, just empty object)
+        response.status(400).send();
     });
 });
 

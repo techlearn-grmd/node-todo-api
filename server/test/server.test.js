@@ -127,7 +127,7 @@ describe('DELETE /todos/:id', (done) => {
         .delete(`/todos/${newHexId}`)
         .expect(200)
         .expect((result) => {
-            expect(result.body.doc._id).toEqual(newHexId);
+            expect(result.body.todo._id).toEqual(newHexId);
         })
         .end((error, result) => {
             if (error) {

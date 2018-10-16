@@ -15,9 +15,9 @@ if (!ObjectID.isValid(id)) {
 }
  
 // you only get how many was removed, but didn't get the data (removed) back
-Todo.remove({}).then((result) => {
-    console.log(result);
-}); // remove everything in the todo collection
+// Todo.remove({}).then((result) => {
+//     console.log(result);
+// }); // remove everything in the todo collection
 
 // it will also return the data you remove
 // Todo.findOneAndRemove({ _id: '5bc4491eba2bed5046679d75' }).then((doc) => {

@@ -1,3 +1,5 @@
+require('./config/config');
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const {ObjectID} = require('mongodb');
@@ -8,7 +10,7 @@ const {User} = require('./models/user');
 const {Todo} = require('./models/todo');
 
 var app = express();
-const port = process.env.PORT || 3000;  // local -> 3000, heroku -> set by env
+const port = process.env.PORT;  // see config/config.js local -> 3000, heroku -> set by env
 
 // body-parser -> take json -> jscript object and attach to the request object 
 // use the middleware to do the conversion

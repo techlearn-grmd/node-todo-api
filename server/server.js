@@ -103,7 +103,7 @@ app.patch('/todos/:id', (request, response) => {
                 return response.status(404).send();
             }
 
-            response.send(todo);
+            response.send({todo});
         }).catch((e) => {                   // for other error, return 404
             response.status(404).send();
         });

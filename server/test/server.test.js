@@ -7,6 +7,7 @@ const {app} = require('./../server');
 // need model from todo to verify the todo is indeed added to the collection
 const {Todo} = require('./../models/todo');
 
+// seeded items
 // our beforeEach() deletes all the data for post (item 1 to fix)
 // but our get needs data to be there in collection to test (preseed item 2 to fix)
 const todosMock = [{
@@ -14,7 +15,9 @@ const todosMock = [{
     text: 'first todo 1'
 }, {
     _id: new ObjectID(),
-    text: 'second todo 2'
+    text: 'second todo 2',
+    completed: true,
+    completedAt: 333
 }]
 
 // testing lifecycle that will run before each test cases
@@ -165,6 +168,64 @@ describe('DELETE /todos/:id', (done) => {
         request(app)
             .delete(`/todos/${newHexId}`)
             .expect(404)
+            .end(done);
+    });
+
+});
+
+describe('PATCH /todos/:id', () => {
+    it('should update the todo', (done) => {
+        // grab id of first item
+        var hexId = todosMock[0]._id.toHexString();
+
+        // update text, and set completed to true
+        var text = 'Text for item 1';
+
+        // assertion:
+        // 200 status
+        // response body text is same as input
+        // completed is true
+        // tobeA() completedAt is a number
+        request(app)
+            .patch(`/todos/${hexId}`)
+            .send({
+                completed: true,
+                text
+            })
+            .expect(200)
+            .expect((result) => {
+                expect(result.body.todo.text).toBe(text);
+                expect(result.body.todo.completed).toBe(true);
+                expect(result.body.todo.completedAt).toBeA('number');
+            })
+            .end(done);
+    });
+
+    it('should clear completedAt when todo is not completed', (done) => {
+        // grab of 2nd todo item
+        // update text, and set completed to false
+        var hexId = todosMock[1]._id.toHexString();
+
+        // update text, and set completed to true
+        var text = 'Text for item 2';
+
+        // assertion:
+        // 200 status
+        // response body text is same as input
+        // completed is false
+        // notToExist() completedAt is null
+        request(app)
+            .patch(`/todos/${hexId}`)
+            .send({
+                completed: false,
+                text
+            })
+            .expect(200)
+            .expect((result) => {
+                expect(result.body.todo.text).toBe(text);
+                expect(result.body.todo.completed).toBe(false);
+                expect(result.body.todo.completedAt).toNotExist();
+            })
             .end(done);
     });
 

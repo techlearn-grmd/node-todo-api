@@ -139,6 +139,31 @@ app.delete('/todos/:id', (request, response) => {
     })
 });
 
+// POST /users
+// POST -> allow us to *Create* new user
+// CRUD, when u create a resource, use POST, and send resource as body (JSON with text property)
+app.post('/users', (request, response) => {
+    var body = _.pick(request.body, ['email', 'password']);
+    var user = new User(body);      // body is already an object, use it as is
+
+    // it's the same user as var definition above
+    //    user.save().then((user) => {
+    user.save().then(() => {
+        // response.send(user);
+        // instead response, we first generateAuthToken for the user
+        return user.generateAuthToken();        // this return a token to be handle by .then() below
+    })
+    .then((token) => {
+        // header arg 1: 'x-auth' -> a custom header, not http support by default
+        // arg 2: token to be set to header
+        response.header('x-auth', token).send(user);
+    })
+    .catch((e) => {
+        response.status(400).send(e);
+    });
+
+});
+
 app.listen(port, () => {
     console.log(`started on ${port}`);
 });
